@@ -19,9 +19,10 @@ mcp:
     filesystem:
       command: "npx"
       args: ["-y", "@modelcontextprotocol/server-filesystem"]
-    brave:
-      command: "npx"
-      args: ["-y", "@modelcontextprotocol/server-brave-search"]
+
+anthropic:
+  default_model: claude-3-5-haiku-20241022
+
 openai:
   # Secrets (API keys, etc.) are stored in an mcp_agent.secrets.yaml file which can be gitignored
   default_model: claude-3-5-haiku-20241022

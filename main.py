@@ -1,6 +1,7 @@
 import asyncio
 import os
 from pathlib import Path
+import yaml
 
 from mcp_agent.app import MCPApp
 from mcp_agent.agents.agent import Agent
@@ -8,6 +9,24 @@ from mcp_agent.workflows.llm.augmented_llm import RequestParams
 from mcp_agent.workflows.llm.augmented_llm_anthropic import AnthropicAugmentedLLM
 from mcp_agent.workflows.orchestrator.orchestrator import Orchestrator
 from rich import print
+
+# Verificar configuración
+print("\nVerificando configuración:")
+try:
+    with open('mcp_agent.config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    print("✓ mcp_agent.config.yaml cargado correctamente")
+except Exception as e:
+    print(f"✗ Error al cargar mcp_agent.config.yaml: {e}")
+
+try:
+    with open('mcp_agent.secrets.yaml', 'r') as f:
+        secrets = yaml.safe_load(f)
+    print("✓ mcp_agent.secrets.yaml cargado correctamente")
+    print(f"  - Anthropic API key presente: {'Sí' if secrets.get('anthropic', {}).get('api_key') else 'No'}")
+    print(f"  - OpenAI API key presente: {'Sí' if secrets.get('openai', {}).get('api_key') else 'No'}")
+except Exception as e:
+    print(f"✗ Error al cargar mcp_agent.secrets.yaml: {e}")
 
 app = MCPApp(name="science_report_orchestrator")
 
@@ -23,16 +42,16 @@ async def example_usage():
         search_agent = Agent(
             name="searcher",
             instruction="""You are an expert web researcher. Your role is to:
-            1. Search for relevant, authoritative sources on the given topic
-            2. Visit the most promising URLs to gather detailed information
+            1. Visit provided URLs to gather detailed information
+            2. Extract and analyze relevant information
             3. Return a structured summary of your findings with source URLs
             
-            Focus on high-quality sources like academic papers, respected tech publications,
-            and official documentation.
+            Focus on analyzing the content from provided URLs, especially from academic papers,
+            respected tech publications, and official documentation.
             
             Save each individual source in the output/sources/ folder. We only need up to 10 sources max.
             """,
-            server_names=["brave", "fetch", "filesystem"],
+            server_names=["fetch", "filesystem"],
         )
 
         # Fact Checker Agent
@@ -43,7 +62,7 @@ async def example_usage():
             2. Check dates, statistics, and technical details for accuracy
             3. Identify any contradictions or inconsistencies
             """,
-            server_names=["brave", "fetch", "filesystem"],
+            server_names=["fetch", "filesystem"],
         )
 
         # Report Writer Agent
